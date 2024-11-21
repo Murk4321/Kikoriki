@@ -14,8 +14,8 @@ GameObject:
   - component: {fileID: 1329616938409668088}
   - component: {fileID: -6991638874120226602}
   m_Layer: 0
-  m_Name: Food
-  m_TagString: Food
+  m_Name: StandartProjectile
+  m_TagString: Projectile
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -130,7 +130,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 4, y: 4}
   m_EdgeRadius: 0
 --- !u!96 &1329616938409668088
 TrailRenderer:
@@ -257,3 +257,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54cf34e62ff202d49b811e74bdd01136, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  launchForce: 10
+  canDealDamage: 0
+  type: 0
+  destroyParticles: {fileID: 8984296959073106891, guid: 51351185614bde64d9a2b47c643ad91e, type: 3}
