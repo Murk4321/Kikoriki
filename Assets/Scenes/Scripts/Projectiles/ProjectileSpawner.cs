@@ -12,7 +12,7 @@ public class ProjectileSpawner : MonoBehaviour
 
     private List<GameObject> projectileList = new List<GameObject>(); 
 
-    [SerializeField] private GameObject projectile; 
+    [SerializeField] private GameObject[] projectiles; 
     private Transform projectileCollector; 
 
     private void Start() {
@@ -49,8 +49,20 @@ public class ProjectileSpawner : MonoBehaviour
         Vector2 randomPosition = new Vector2(randomX, randomY);
         Quaternion randomRotation = Quaternion.Euler(0, 0, Random.Range(0, 360));
 
-        GameObject projectileInstance = Instantiate(projectile, randomPosition, randomRotation, projectileCollector);
+        GameObject projectileChosen = ChooseProjectile();
+
+        GameObject projectileInstance = Instantiate(projectileChosen, randomPosition, randomRotation, projectileCollector);
         return projectileInstance;
     }
 
+    private GameObject ChooseProjectile() {
+        float chosenNumber = Random.value;
+
+        if (chosenNumber < 0.2) {
+            return projectiles[1];
+        }
+        else {
+            return projectiles[0];
+        }
+    }
 }

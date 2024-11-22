@@ -8,7 +8,7 @@ public class EnemySpawner : MonoBehaviour {
     private float maxEnemies = 20;
     private float spawnDelay = 10f;
 
-    private List<GameObject> enemyList = new List<GameObject>();
+    public List<GameObject> enemyList = new List<GameObject>();
 
     [SerializeField] private GameObject enemy;
 

@@ -17,6 +17,10 @@ public class ProjectileCollectingAndOrbiting : MonoBehaviour
                 collision.transform.SetParent(transform);
                 collision.gameObject.layer = 3;
                 AddOrbitingObject(collision.gameObject);
+
+                ProjectileScript projectileScript = collision.gameObject.GetComponent<ProjectileScript>();
+
+                projectileScript.AfterPickup();
             }
         }
     }

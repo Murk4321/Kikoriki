@@ -32,12 +32,14 @@ public class ProjectileLauncher : MonoBehaviour
         }
 
         ProjectileScript projectileScript = GetProjectileFromList(projectileList);
-        Rigidbody2D projPb = AddRigidbody();
+        Rigidbody2D projPb = GetRigidbody();
 
         projectileScript.canDealDamage = true;
         LaunchTowardsMouse(projPb, projectileScript);
         projectileList.Remove(projectileList.Last());
         Destroy(projectileGameObject, 10);
+
+        projectileScript.AfterLaunch();
     }
 
     private ProjectileScript GetProjectileFromList(List<OrbitingObjectData> projectileList) {
@@ -55,10 +57,8 @@ public class ProjectileLauncher : MonoBehaviour
         projPb.AddForce(forceDirection, ForceMode2D.Impulse);
     }
 
-    private Rigidbody2D AddRigidbody() {
-        Rigidbody2D projPb = projectileGameObject.AddComponent<Rigidbody2D>();
-        projPb.gravityScale = 0;
-        projPb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+    private Rigidbody2D GetRigidbody() {
+        Rigidbody2D projPb = projectileGameObject.GetComponent<Rigidbody2D>();
         return projPb;
     }
 }
