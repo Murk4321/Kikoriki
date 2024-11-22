@@ -69,11 +69,15 @@ public class ProjectileScript : MonoBehaviour {
     private void FixedUpdate() {
         if (homing) {
             if (target != null) {
-                Vector2 direction = (target.position - transform.position).normalized;
-                float rotateAmount = Vector3.Cross(direction, transform.up).z;
-                transform.Rotate(0, 0, -rotateAmount * 20000 * Time.deltaTime);
+                Vector2 direction = (Vector2)target.position - rb.position;
+                direction.Normalize();
 
-                transform.Translate(Vector3.up * 15 * Time.deltaTime);
+                float rotateAmount = Vector3.Cross(direction, transform.up).z;
+                rb.angularVelocity = -rotateAmount * 300;
+
+                rb.velocity = transform.up * 50;
+            } else {
+                return;
             }
         }
     }
