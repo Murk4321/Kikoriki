@@ -1,68 +1,80 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
-public class ProjectileSpawner : MonoBehaviour
-{
-    private float mapSize = 800; 
-    private float maxProjectiles = 1000; 
-    private float spawnDelay = 0.2f;
-    private int projectilesOnStart = 20;
+public class ProjectileSpawner : MonoBehaviour {
+    [SerializeField] private float mapSize = 800f; // Size of the spawning area
+    [SerializeField] private int maxProjectiles = 1000; // Max projectiles allowed
+    [SerializeField] private float spawnDelay = 0.2f; // Delay between spawns
+    [SerializeField] private int projectilesOnStart = 20; // Initial number of projectiles
+    [SerializeField] private GameObject[] projectiles; // Array of projectile prefabs
+    [SerializeField] private Transform projectileCollector; // Parent for spawned projectiles
 
-    private List<GameObject> projectileList = new List<GameObject>(); 
-
-    [SerializeField] private GameObject[] projectiles; 
-    private Transform projectileCollector; 
+    private readonly List<GameObject> projectileList = new List<GameObject>(); // Active projectiles list
 
     private void Start() {
-        projectileCollector = GameObject.Find("ProjectileCollector").transform;
+        // Validate inputs
+        if (projectileCollector == null) {
+            Debug.LogError("ProjectileCollector is not assigned in the inspector!");
+            return;
+        }
 
-        SpawnOnStart();
+        if (projectiles == null || projectiles.Length == 0) {
+            Debug.LogError("Projectile prefabs are not assigned!");
+            return;
+        }
 
-        StartCoroutine(SpawnProjectile());
+        SpawnOnStart(); // Spawn initial projectiles
+        StartCoroutine(SpawnProjectileCoroutine()); // Start spawning loop
     }
 
     private void SpawnOnStart() {
         for (int i = 0; i < projectilesOnStart; i++) {
-            Spawn();
+            SpawnProjectile();
         }
     }
 
-    IEnumerator SpawnProjectile() {
+    private IEnumerator SpawnProjectileCoroutine() {
         while (true) {
-            projectileList.RemoveAll(projectile => projectile == null); 
+            // Remove null references (for projectiles destroyed or collected)
+            projectileList.RemoveAll(projectile => projectile == null);
 
+            // Spawn new projectile if below limit
             if (projectileList.Count < maxProjectiles) {
-                GameObject projectileInstance = Spawn();
-                projectileList.Add(projectileInstance);
+                GameObject newProjectile = SpawnProjectile();
+                projectileList.Add(newProjectile);
             }
 
             yield return new WaitForSeconds(spawnDelay);
         }
     }
 
-    private GameObject Spawn() {
-        float randomX = Random.Range(-mapSize, mapSize);
-        float randomY = Random.Range(-mapSize, mapSize);
-
-        Vector2 randomPosition = new Vector2(randomX, randomY);
+    private GameObject SpawnProjectile() {
+        // Generate random position and rotation
+        Vector2 randomPosition = new Vector2(
+            Random.Range(-mapSize, mapSize),
+            Random.Range(-mapSize, mapSize)
+        );
         Quaternion randomRotation = Quaternion.Euler(0, 0, Random.Range(0, 360));
 
-        GameObject projectileChosen = ChooseProjectile();
+        // Choose projectile and instantiate
+        GameObject selectedProjectile = ChooseProjectile();
+        GameObject newProjectile = Instantiate(selectedProjectile, randomPosition, randomRotation, projectileCollector);
 
-        GameObject projectileInstance = Instantiate(projectileChosen, randomPosition, randomRotation, projectileCollector);
-        return projectileInstance;
+        return newProjectile;
     }
 
     private GameObject ChooseProjectile() {
-        float chosenNumber = Random.value;
+        // Ensure the projectile array is valid
+        if (projectiles == null || projectiles.Length == 0) {
+            Debug.LogError("No projectiles available to spawn!");
+            return null;
+        }
 
-        if (chosenNumber < 0.2) {
-            return projectiles[1];
-        }
-        else {
-            return projectiles[0];
-        }
+        // Randomly choose a projectile with weighted probability
+        float randomValue = Random.value;
+        return randomValue < 0.2f && projectiles.Length > 1
+            ? projectiles[1] // 20% chance for second projectile type
+            : projectiles[0]; // Default to first projectile type
     }
 }

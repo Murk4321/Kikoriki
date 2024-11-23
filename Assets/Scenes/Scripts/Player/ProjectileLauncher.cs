@@ -1,64 +1,60 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
+using UnityEngine;
 using static ProjectileCollectingAndOrbiting;
-using UnityEditor;
 
-public class ProjectileLauncher : MonoBehaviour
-{
+public class ProjectileLauncher : MonoBehaviour {
     private ProjectileCollectingAndOrbiting projectileDatabase;
-    private GameObject projectileGameObject;
+    private GameObject currentProjectile;
 
     private void Awake() {
         projectileDatabase = GetComponent<ProjectileCollectingAndOrbiting>();
     }
 
     private void Update() {
-        ManageLaunching();
-    }
-
-    private void ManageLaunching() {
         if (Input.GetMouseButtonDown(0)) {
             LaunchProjectile();
         }
     }
 
     private void LaunchProjectile() {
-        List<OrbitingObjectData> projectileList = projectileDatabase.orbitingObjects;
-
-        if (projectileList.Count == 0) {
+        if (projectileDatabase.orbitingObjects.Count == 0) {
             return;
         }
 
-        ProjectileScript projectileScript = GetProjectileFromList(projectileList);
-        Rigidbody2D projPb = GetRigidbody();
+        // Get the last projectile and detach it
+        OrbitingObjectData projectileData = projectileDatabase.orbitingObjects.Last();
+        projectileDatabase.RemoveOrbitingObject(projectileData.Object.gameObject);
 
+        currentProjectile = projectileData.Object.gameObject;
+
+        // Get required components
+        Rigidbody2D rb = currentProjectile.GetComponent<Rigidbody2D>();
+        ProjectileScript projectileScript = currentProjectile.GetComponent<ProjectileScript>();
+
+        if (rb == null || projectileScript == null) {
+            Debug.LogWarning("Projectile is missing required components!");
+            return;
+        }
+
+        // Enable damage and launch
         projectileScript.canDealDamage = true;
-        LaunchTowardsMouse(projPb, projectileScript);
-        projectileList.Remove(projectileList.Last());
-        Destroy(projectileGameObject, 10);
+        LaunchTowardsMouse(rb, projectileScript);
 
+        // Schedule destruction after a delay
+        Destroy(currentProjectile, 10);
+
+        // Trigger post-launch logic
         projectileScript.AfterLaunch();
     }
 
-    private ProjectileScript GetProjectileFromList(List<OrbitingObjectData> projectileList) {
-        projectileGameObject = projectileList.Last().Object.gameObject;
-        projectileGameObject.transform.parent = null;
-        ProjectileScript projectileScript = projectileGameObject.GetComponent<ProjectileScript>();
-        return projectileScript;
-    }
-
-    private void LaunchTowardsMouse(Rigidbody2D projPb, ProjectileScript projectile) {
+    private void LaunchTowardsMouse(Rigidbody2D rb, ProjectileScript projectile) {
         Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector3 movePosition = mousePosition - transform.position;
-        Vector2 forceDirection = new Vector2(movePosition.x, movePosition.y) * projectile.launchForce;
+        mousePosition.z = 0f; // Ensure we are working in 2D space
+        Vector3 direction = (mousePosition - transform.position);
 
-        projPb.AddForce(forceDirection, ForceMode2D.Impulse);
-    }
-
-    private Rigidbody2D GetRigidbody() {
-        Rigidbody2D projPb = projectileGameObject.GetComponent<Rigidbody2D>();
-        return projPb;
+        // Apply force based on projectile's launch force
+        rb.AddForce(direction * projectile.launchForce, ForceMode2D.Impulse);
     }
 }

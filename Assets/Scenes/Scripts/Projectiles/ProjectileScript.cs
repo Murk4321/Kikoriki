@@ -1,107 +1,117 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class ProjectileScript : MonoBehaviour {
     public enum ProjectileType {
-        Standart,
+        Standard,
         Homing
     }
 
-    public float launchForce = 10;
+    [Header("Projectile Settings")]
+    public float launchForce = 10f;
     public bool canDealDamage = false;
     public ProjectileType type;
+
+    [Header("Homing Settings")]
+    [SerializeField] private float homingSpeed = 50f;
+    [SerializeField] private float rotationSpeed = 300f;
+
+    [Header("Visuals and Effects")]
+    [SerializeField] private GameObject destroyParticles;
+
     private SpriteRenderer sr;
     private Rigidbody2D rb;
-    private bool homing = false;
+    private bool isHoming = false;
     private Transform target;
-    [SerializeField] private GameObject destroyParticles;
 
     private void Awake() {
         sr = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
+
+        if (destroyParticles == null) {
+            Debug.LogWarning("DestroyParticles prefab is not assigned.");
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision) {
-        if (canDealDamage) {
-            if (collision.CompareTag("Enemy")) {
-                HitEnemy(collision);
-            }
+        if (canDealDamage && collision.CompareTag("Enemy")) {
+            HitEnemy(collision);
         }
     }
 
     private void HitEnemy(Collider2D collision) {
-        EnemyScript enemy = collision.gameObject.GetComponent<EnemyScript>();
-        enemy.Hit();
+        EnemyScript enemy = collision.GetComponent<EnemyScript>();
+        if (enemy != null) {
+            enemy.Hit();
+        }
         DestroyProjectile();
     }
 
     private void DestroyProjectile() {
-        ParticleSystem particles = destroyParticles.GetComponent<ParticleSystem>();
-        var main = particles.main;
-        main.startColor = sr.color;
+        if (destroyParticles != null) {
+            // Instantiate particles and match projectile color
+            GameObject particlesInstance = Instantiate(destroyParticles, transform.position, Quaternion.identity);
+            ParticleSystem particles = particlesInstance.GetComponent<ParticleSystem>();
+            if (particles != null) {
+                var main = particles.main;
+                main.startColor = sr.color;
+            }
+        }
 
         Destroy(gameObject);
-        Instantiate(destroyParticles, transform.position, Quaternion.identity);
     }
 
     public void AfterPickup() {
-        
+        // Logic for when the projectile is picked up
     }
 
     public void AfterLaunch() {
-       if (type == ProjectileType.Homing) {
-            ManageHomingProjectile();
-       }
+        if (type == ProjectileType.Homing) {
+            SetupHomingProjectile();
+        }
     }
 
-    private void ManageHomingProjectile() {
+    private void SetupHomingProjectile() {
         target = FindNearestEnemy();
-        if (target == null) { 
-            return;
+        if (target != null) {
+            isHoming = true;
         }
-
-        homing = true;
     }
 
     private void FixedUpdate() {
-        if (homing) {
-            if (target != null) {
-                Vector2 direction = (Vector2)target.position - rb.position;
-                direction.Normalize();
-
-                float rotateAmount = Vector3.Cross(direction, transform.up).z;
-                rb.angularVelocity = -rotateAmount * 300;
-
-                rb.velocity = transform.up * 50;
-            } else {
-                return;
-            }
+        if (isHoming) {
+            UpdateHomingMovement();
         }
     }
 
+    private void UpdateHomingMovement() {
+        if (target == null) {
+            isHoming = false;
+            return;
+        }
+
+        // Calculate direction and rotate towards the target
+        Vector2 direction = ((Vector2)target.position - rb.position).normalized;
+        float rotateAmount = Vector3.Cross(direction, transform.up).z;
+
+        rb.angularVelocity = -rotateAmount * rotationSpeed;
+        rb.velocity = transform.up * homingSpeed;
+    }
+
     private Transform FindNearestEnemy() {
-        GameObject nearestEnemy = null;
-        float shortestDistance = 1000;
-
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        Transform nearestEnemy = null;
+        float shortestDistance = Mathf.Infinity;
 
-        if (enemies.Length > 0) {
-            foreach (GameObject enemy in enemies) {
-                float distance = Vector2.Distance(transform.position, enemy.transform.position);
-                if (distance < shortestDistance) {
-                    shortestDistance = distance;
-                    nearestEnemy = enemy;
-                }
-            }
-            
-            if (nearestEnemy != null) {
-                return nearestEnemy.transform;
+        foreach (GameObject enemy in enemies) {
+            float distance = Vector2.Distance(transform.position, enemy.transform.position);
+            if (distance < shortestDistance) {
+                shortestDistance = distance;
+                nearestEnemy = enemy.transform;
             }
         }
 
-        return null;
+        return nearestEnemy;
     }
 }
