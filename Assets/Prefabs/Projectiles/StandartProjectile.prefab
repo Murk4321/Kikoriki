@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 6520508333224557898}
   - component: {fileID: 4336660670192417290}
   - component: {fileID: 1329616938409668088}
-  - component: {fileID: -6991638874120226602}
   - component: {fileID: -7716888015676285562}
+  - component: {fileID: 7054283103111724581}
   m_Layer: 0
   m_Name: StandartProjectile
   m_TagString: Projectile
@@ -246,22 +246,6 @@ TrailRenderer:
   m_Autodestruct: 0
   m_Emitting: 1
   m_ApplyActiveColorSpace: 1
---- !u!114 &-6991638874120226602
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 381165761573271709}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 54cf34e62ff202d49b811e74bdd01136, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  launchForce: 10
-  canDealDamage: 0
-  type: 0
-  destroyParticles: {fileID: 8984296959073106891, guid: 51351185614bde64d9a2b47c643ad91e, type: 3}
 --- !u!50 &-7716888015676285562
 Rigidbody2D:
   serializedVersion: 4
@@ -289,3 +273,21 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &7054283103111724581
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 381165761573271709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54cf34e62ff202d49b811e74bdd01136, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  launchForce: 10
+  canDealDamage: 0
+  type: 0
+  homingSpeed: 50
+  rotationSpeed: 300
+  destroyParticles: {fileID: 8984296959073106891, guid: 51351185614bde64d9a2b47c643ad91e, type: 3}

@@ -6158,7 +6158,8 @@ MonoBehaviour:
   mapSize: 800
   maxEnemies: 20
   spawnDelay: 10
-  enemyPrefabs: []
+  enemyPrefabs:
+  - {fileID: 4671294598546206165, guid: 0ba42f92df5ca9043afb8b7d0604daf4, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

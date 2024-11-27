@@ -3,32 +3,34 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyScript : MonoBehaviour {
+    // ѕерел≥ченн€ тип≥в ворог≥в
     public enum EnemyType {
-        Default
+        Default // —тандартний тип ворога
     }
 
     [Header("Enemy Settings")]
-    public EnemyType type;
-    [SerializeField] private float speed = 40f; // Movement speed
-    [SerializeField] private GameObject destroyParticles; // Particles on destruction
+    public EnemyType type; // “ип ворога
+    [SerializeField] private float speed = 40f; // Ўвидк≥сть руху ворога
+    [SerializeField] private GameObject destroyParticles; // „астинки при знищенн≥ ворога
 
-    private Transform player;
-    private Rigidbody2D rb;
+    private Transform player; // ѕосиланн€ на гравц€
+    private Rigidbody2D rb; 
     private SpriteRenderer sr;
 
     private void Awake() {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
 
-        // Find player by tag for robustness
+        // «находимо об'Їкт гравц€ за тегом дл€ над≥йност≥
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         if (playerObject != null) {
-            player = playerObject.transform;
+            player = playerObject.transform; // ѕрив'€зуЇмо посиланн€ на гравц€
         } else {
+            // якщо гравець не знайдений, виводимо помилку
             Debug.LogError("Player not found! Ensure the player object has the 'Player' tag.");
         }
 
-        // Validate destroyParticles assignment
+        // ѕерев≥рка на€вност≥ префабу частинок дл€ знищенн€
         if (destroyParticles == null) {
             Debug.LogWarning("DestroyParticles prefab is not assigned.");
         }
@@ -36,30 +38,33 @@ public class EnemyScript : MonoBehaviour {
 
     private void FixedUpdate() {
         if (player != null) {
-            MoveTowardsPlayer();
+            MoveTowardsPlayer(); // –ух ворога до гравц€
         }
     }
 
+    // ћетод дл€ руху ворога до гравц€
     private void MoveTowardsPlayer() {
-        // Calculate direction towards the player
+        // ќбчислюЇмо напр€мок до гравц€
         Vector2 direction = ((Vector2)(player.position - transform.position)).normalized;
 
-        // Set velocity directly for consistent movement
-        rb.velocity = direction * speed;
+        // ¬становлюЇмо швидк≥сть руху ворога, множимо напр€мок на швидк≥сть
+        rb.AddForce(direction * speed, ForceMode2D.Force);
     }
 
+    // ћетод дл€ обробки з≥ткненн€ ворога (наприклад, при влучанн≥ снар€да)
     public void Hit() {
-        // Instantiate particles if assigned
+        // якщо Ї префаб частинок, ≥нстанц≥юЇмо њх на м≥сц≥ ворога
         if (destroyParticles != null) {
             GameObject particlesInstance = Instantiate(destroyParticles, transform.position, Quaternion.identity);
             ParticleSystem particles = particlesInstance.GetComponent<ParticleSystem>();
             if (particles != null) {
-                // Match particle color to enemy sprite
+                // ¬становлюЇмо кол≥р частинок в≥дпов≥дно до кольору ворога
                 var main = particles.main;
                 main.startColor = sr.color;
             }
         }
 
-        Destroy(gameObject); // Destroy the enemy
+        // «нищуЇмо ворога
+        Destroy(gameObject);
     }
 }
